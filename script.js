@@ -1,5 +1,5 @@
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxzZYe5BaTzMgElWDM_MAj6KsnMI4geBGBeO6JdCJCQXzRPDxhmSyKe5LCshSMD1yOU/exec";
+  "https://script.google.com/macros/s/AKfycbzHHhREDEY_fU4SLpRkbtLrbNghUYRGOTzIjvFaO8mD2gAtAWPSv-Nw4AX0Aa6VRBhg/exec";
 
 const ITEMS_PER_PAGE = 10;
 const SONGS_PER_PAGE = 10;
@@ -33,6 +33,7 @@ let notifStartX = 0;
 
 let notifMoveX = 0;
 let notifDragged = false;
+let notifModalTouched = false;
 
 const notifTrack =
   document.getElementById(
@@ -273,7 +274,7 @@ function startNotifAutoplay() {
 
       updateNotifSlider();
 
-    }, 3000);
+    }, 5000);
 }
 
 function pauseNotifAutoplay() {
@@ -1853,28 +1854,77 @@ notifBtn.addEventListener(
         slide.className =
           "notif-slide";
 
+        slide.innerHTML = `
+          <img
+            src="${src.image}"
+            draggable="false"
+          >
+        `;
+
+        const img =
+          slide.querySelector("img");
+
+        img.addEventListener(
+          "load",
+          () => {
+
+            const canvas =
+              document.createElement(
+                "canvas"
+              );
+
+            const ctx =
+              canvas.getContext("2d");
+
+            canvas.width = 1;
+            canvas.height = 1;
+
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              1,
+              1
+            );
+
+            const pixel =
+              ctx.getImageData(
+                0,
+                0,
+                1,
+                1
+              ).data;
+
+            const color =
+              `rgba(
+                ${pixel[0]},
+                ${pixel[1]},
+                ${pixel[2]},
+                .45
+              )`;
+
+            slide.style.border =
+              `1px solid ${color}`;
+          }
+        );
+
         if (src.link) {
 
-          slide.innerHTML = `
-            <a
-              href="${src.link}"
-              target="_blank"
-            >
-              <img
-                src="${src.image}"
-                draggable="false"
-              >
-            </a>
-          `;
+          slide.style.cursor =
+            "pointer";
 
-        } else {
+          slide.addEventListener(
+            "click",
+            () => {
 
-          slide.innerHTML = `
-            <img
-              src="${src.image}"
-              draggable="false"
-            >
-          `;
+              if (notifDragged) return;
+
+              window.open(
+                src.link,
+                "_blank"
+              );
+            }
+          );
         }
 
         notifTrack.appendChild(
@@ -1944,6 +1994,50 @@ notifClose.addEventListener(
   }
 );
 
+notifModal.addEventListener(
+  "click",
+  (e) => {
+
+    if (
+      !e.target.closest(
+        ".notif-box"
+      )
+    ) {
+
+      notifModal.classList.add(
+        "hidden"
+      );
+
+      clearInterval(
+        notifInterval
+      );
+    }
+  }
+);
+
+notifModal.addEventListener(
+  "pointerup",
+  (e) => {
+
+    if (
+      e.target === notifModal &&
+      notifModalTouched &&
+      !notifDragged
+    ) {
+
+      notifModal.classList.add(
+        "hidden"
+      );
+
+      clearInterval(
+        notifInterval
+      );
+    }
+
+    notifModalTouched = false;
+  }
+);
+
 function notifPointerStart(x) {
 
   isDragging = true;
@@ -1982,7 +2076,12 @@ function notifPointerEnd() {
   const diff =
     notifStartX - notifMoveX;
 
-  if (Math.abs(diff) < 50) return;
+  if (Math.abs(diff) < 50) {
+
+    isDragging = false;
+
+    return;
+  }
 
   if (diff > 0) {
 
@@ -2015,7 +2114,7 @@ function notifPointerEnd() {
 
     notifDragged = false;
 
-  }, 50);
+  }, 100);
 }
 
 notifTrack.addEventListener(

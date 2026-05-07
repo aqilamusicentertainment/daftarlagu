@@ -1,11 +1,17 @@
 {
   "name": "AQILA MUSIC",
   "short_name": "AQILA",
+
   "start_url": "./",
+
   "display": "standalone",
+
   "background_color": "#0f0f10",
+
   "theme_color": "#ff7a00",
+
   "orientation": "portrait",
+
   "icons": [
     {
       "src": "icon.png",

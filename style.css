@@ -1791,6 +1791,7 @@ body.player-mode #dashboardSection td:nth-child(4) {
 
   z-index: 9999;
   touch-action: none;
+  padding: 24px;
 }
 
 .notif-modal.hidden {
@@ -1821,6 +1822,12 @@ body.player-mode #dashboardSection td:nth-child(4) {
 
   animation:
     notifPop .25s ease;
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(255,255,255,.14);
+
+  margin: auto;
 }
 
 .notif-box img {
@@ -1907,20 +1914,6 @@ body.player-mode #dashboardSection td:nth-child(4) {
     transform .45s ease;
 }
 
-.notif-slide {
-  min-width: 100%;
-  height: 100%;
-}
-
-.notif-slide img {
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-
-  display: block;
-}
-
 .notif-dots {
   position: absolute;
 
@@ -1969,4 +1962,22 @@ body.player-mode #dashboardSection td:nth-child(4) {
 
   width: 100%;
   height: 100%;
+}
+
+.notif-slide {
+  min-width: 100%;
+  height: 100%;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+}
+
+.notif-slide img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
 }
