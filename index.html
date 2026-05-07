@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1"
+  />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>AQILA MUSIC</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css"
+  />
+
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="theme-color" content="#ff7a00">
+</head>
+
+<body>
+
+  <section id="loginPage" class="login-page">
+
+    <button class="theme-toggle" id="themeToggle">
+      <i class="ri-moon-clear-line"></i>
+    </button>
+
+    <div class="login-card">
+
+      <div class="login-logo">
+        <i class="ri-disc-fill"></i>
+      </div>
+
+      <h1 class="login-title">
+        AQILA MUSIC
+      </h1>
+
+      <p class="login-subtitle"></p>
+
+      <form id="loginForm" class="login-form">
+
+        <div class="input-group">
+
+          <label>
+            Pilih Role
+          </label>
+
+          <div class="custom-select" id="customSelect">
+
+            <div class="select-selected">
+
+              <div class="select-left">
+
+                <i class="ri-user-3-line"></i>
+
+                <span id="selectedText">
+                  Pilih Role
+                </span>
+
+              </div>
+
+              <i class="ri-arrow-down-s-line"></i>
+
+            </div>
+
+            <div class="select-options">
+
+              <div
+                class="select-option"
+                data-value="player"
+              >
+                Player
+              </div>
+
+              <div
+                class="select-option"
+                data-value="vocal"
+              >
+                Vocal
+              </div>
+
+            </div>
+
+          </div>
+
+          <input
+            type="hidden"
+            id="role"
+            required
+          />
+
+        </div>
+
+        <div class="input-group">
+
+          <label>
+            PIN
+          </label>
+
+          <div class="input-box">
+
+            <i class="ri-lock-2-line"></i>
+
+            <input
+              type="password"
+              id="pin"
+              placeholder="Masukkan PIN"
+              required
+            />
+
+          </div>
+
+        </div>
+
+        <button
+          type="submit"
+          class="login-btn"
+        >
+          Masuk
+        </button>
+
+      </form>
+
+    </div>
+
+  </section>
+
+  <section id="appPage" class="app hidden">
+
+    <header class="mobile-header">
+
+      <div class="header-inner">
+
+        <button
+          class="icon-btn"
+          id="themeToggleApp"
+        >
+          <i class="ri-moon-clear-line"></i>
+        </button>
+
+        <div class="header-center">
+
+          <h1>
+            AQILA MUSIC
+          </h1>
+
+          <span id="roleBadge"></span>
+
+        </div>
+
+        <button class="icon-btn">
+          <i class="ri-notification-3-line"></i>
+        </button>
+
+      </div>
+
+    </header>
+
+    <main class="main-content">
+
+      <section
+        id="dashboardSection"
+        class="content-section active"
+      >
+
+        <div class="table-card">
+
+          <div class="card-title">
+
+            <h2>
+              Daftar Lagu
+            </h2>
+
+          </div>
+
+          <div class="song-filter-row">
+
+            <div class="search-box">
+
+              <i class="ri-search-line"></i>
+
+              <input
+                type="text"
+                id="songSearch"
+                placeholder="Cari lagu..."
+              />
+
+            </div>
+
+            <div
+              class="custom-filter-box"
+              id="songCategoryFilter"
+            >
+
+              <div class="filter-selected">
+
+                <span id="songCategoryText">
+                  Semua
+                </span>
+
+                <i class="ri-arrow-down-s-line"></i>
+
+              </div>
+
+              <div class="filter-options">
+
+                <div
+                  class="filter-option active"
+                  data-value="all"
+                >
+                  Semua
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Trend 2026"
+                >
+                  Trend 2026
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Trend 2025"
+                >
+                  Trend 2025
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Trend 2024"
+                >
+                  Trend 2024
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Trend 2023 Kebawah"
+                >
+                  Trend 2023
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Lawasan V1"
+                >
+                  Lawasan V1
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Lawasan V2"
+                >
+                  Lawasan V2
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Campursari"
+                >
+                  Campursari
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="Religi"
+                >
+                  Religi
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div id="songTables"></div>
+
+        </div>
+
+      </section>
+
+      <section
+        id="requestSection"
+        class="content-section"
+      >
+
+        <div class="table-card">
+
+          <div class="card-title">
+
+            <h2>
+              Daftar Request
+            </h2>
+
+          </div>
+
+          <div class="filter-row">
+
+            <div class="request-search">
+
+              <i class="ri-search-line"></i>
+
+              <input
+                type="text"
+                id="requestSearch"
+                placeholder="Cari request..."
+              />
+
+            </div>
+
+            <div
+              class="custom-filter-box"
+              id="requestFilter"
+            >
+
+              <div class="filter-selected">
+
+                <span id="filterSelectedText">
+                  Terbaru
+                </span>
+
+                <i class="ri-arrow-down-s-line"></i>
+
+              </div>
+
+              <div class="filter-options">
+
+                <div
+                  class="filter-option active"
+                  data-value="newest"
+                >
+                  Terbaru
+                </div>
+
+                <div
+                  class="filter-option"
+                  data-value="oldest"
+                >
+                  Terlama
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="table-responsive">
+
+            <table>
+
+              <thead>
+
+                <tr id="requestHead"></tr>
+
+              </thead>
+
+              <tbody id="requestBody">
+
+                <tr>
+
+                  <td colspan="10">
+                    Loading...
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          <div
+            class="pagination"
+            id="requestPagination"
+          ></div>
+
+        </div>
+
+        <div class="request-form-card">
+
+          <div class="card-title">
+
+            <h2>
+              Request Lagu
+            </h2>
+
+          </div>
+
+          <form id="requestForm">
+
+            <div class="input-group">
+
+              <label>
+                Nama Lagu
+              </label>
+
+              <div class="input-box">
+
+                <i class="ri-music-2-line"></i>
+
+                <input
+                  type="text"
+                  id="namaLagu"
+                  maxlength="30"
+                  placeholder="Masukkan nama lagu"
+                  required
+                />
+
+              </div>
+
+              <div
+                class="char-counter input-counter"
+                id="namaCounter"
+              >
+                0/30
+              </div>
+
+            </div>
+
+            <div class="input-group">
+
+              <label>
+                Catatan
+              </label>
+
+              <div class="textarea-box">
+
+                <i class="ri-edit-2-line"></i>
+
+                <textarea
+                  id="catatan"
+                  rows="4"
+                  maxlength="100"
+                  placeholder="Tambahkan catatan..."
+                ></textarea>
+
+              </div>
+
+              <div
+                class="char-counter textarea-counter"
+                id="catatanCounter"
+              >
+                0/100
+              </div>
+
+            </div>
+
+            <button
+              type="submit"
+              class="btn-primary full-btn"
+              id="requestBtn"
+            >
+              Kirim Request
+            </button>
+
+          </form>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <nav class="bottom-nav">
+
+      <button
+        class="nav-btn active"
+        data-target="dashboardSection"
+      >
+
+        <i class="ri-home-5-line"></i>
+
+        <small>
+          Home
+        </small>
+
+      </button>
+
+      <button
+        class="nav-btn"
+        data-target="requestSection"
+      >
+
+        <i class="ri-sticky-note-line"></i>
+
+        <small>
+          Request
+        </small>
+
+      </button>
+
+      <button
+        class="logout-btn"
+        id="logoutBtn"
+      >
+
+        <i class="ri-user-3-line"></i>
+
+        <small>
+          Logout
+        </small>
+
+      </button>
+
+    </nav>
+
+  </section>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
