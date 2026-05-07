@@ -384,50 +384,121 @@ body:not(.dark) .select-selected {
 .select-options {
   position: absolute;
 
-  top: 70px;
+  top: calc(100% + 10px);
   left: 0;
-
-  width: 100%;
+  right: 0;
 
   background: var(--card);
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
 
   border-radius: 22px;
 
-  overflow: hidden;
+  padding: 10px;
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.08);
 
   opacity: 0;
   visibility: hidden;
 
-  transform: translateY(-10px);
+  transform:
+    translateY(-10px)
+    scale(0.96);
 
-  z-index: 99;
+  transition:
+    all .25s ease;
+
+  z-index: 100;
 }
 
 .custom-select.active .select-options {
   opacity: 1;
   visibility: visible;
 
-  transform: translateY(0);
+  transform:
+    translateY(0)
+    scale(1);
 }
 
-
 .select-option {
-  padding: 16px 20px;
+  position: relative;
+
+  padding: 15px 18px;
+
+  border-radius: 16px;
 
   cursor: pointer;
 
   transition:
-    background .2s ease,
-    color .2s ease;
+    all .2s ease;
+
+  font-weight: 700;
+}
+
+.select-option:first-child:hover {
+  border-radius:
+    16px 16px 0 0;
+}
+
+.select-option:not(:first-child):not(:last-child):hover {
+  border-radius: 0;
+}
+
+.select-option:last-child:hover {
+  border-radius:
+    0 0 16px 16px;
 }
 
 .select-option:hover {
   background:
-    rgba(255, 122, 0, 0.12);
+    rgba(255,122,0,.12);
 
-  color: var(--primary);
+  color:
+    var(--primary);
+}
+
+.select-option:last-child::after {
+  display: none;
+}
+
+.select-option::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0px;
+  right: 0px;
+
+  bottom: 0;
+
+  height: 1px;
+
+  background:
+    var(--border);
+}
+
+.select-option.active {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,122,0,.18),
+      rgba(255,170,60,.12)
+    );
+
+  color:
+    var(--primary);
+}
+
+.custom-select.active
+.select-selected i:last-child {
+  transform: rotate(180deg);
+}
+
+.select-selected i:last-child {
+  transition:
+    transform .25s ease;
 }
 
 .theme-toggle {
@@ -723,6 +794,17 @@ td {
 td {
   border-bottom:
     1px solid var(--border);
+}
+
+th,
+td {
+  border-right:
+    1px solid var(--border);
+}
+
+th:last-child,
+td:last-child {
+  border-right: none;
 }
 
 .text-left {
@@ -1372,25 +1454,28 @@ body.dark .filter-selected {
 .filter-options {
   position: absolute;
 
-  top: 54px;
+  top: calc(100% + 10px);
   left: 0;
-
-  width: 100%;
-
-  overflow: hidden;
-
-  border-radius: 14px;
+  right: 0;
 
   background: var(--card);
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
 
-  box-shadow: var(--shadow);
+  border-radius: 22px;
+
+  overflow: hidden;
 
   opacity: 0;
   visibility: hidden;
 
-  transform: translateY(-8px);
+  transform:
+    translateY(-10px)
+    scale(0.96);
+
+  transition:
+    all .25s ease;
 
   z-index: 100;
 }
@@ -1404,7 +1489,19 @@ body.dark .filter-options {
   opacity: 1;
   visibility: visible;
 
-  transform: translateY(0);
+  transform:
+    translateY(0)
+    scale(1);
+}
+
+.filter-selected i {
+  transition:
+    transform .25s ease;
+}
+
+.custom-filter-box.active
+.filter-selected i {
+  transform: rotate(180deg);
 }
 
 .filter-option {
@@ -1414,6 +1511,27 @@ body.dark .filter-options {
 
   font-size: 14px;
   font-weight: 700;
+  position: relative;
+}
+
+.filter-option::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0px;
+  right: 0px;
+
+  bottom: 0;
+
+  height: 1px;
+
+  background:
+    var(--border);
+}
+
+.filter-option:last-child::after {
+  display: none;
 }
 
 .filter-option:hover {
@@ -1610,4 +1728,245 @@ body.player-mode #dashboardSection td:nth-child(4) {
   text-align: center !important;
 
   vertical-align: middle !important;
+}
+
+.rotating {
+  display: inline-block;
+
+  animation:
+    rotate .8s linear infinite;
+}
+
+@keyframes rotate {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  padding: 30px 20px;
+
+  color: var(--soft);
+
+  font-weight: 700;
+}
+
+.rotating {
+  display: inline-block;
+
+  animation:
+    rotate .8s linear infinite;
+}
+
+@keyframes rotate {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.notif-modal {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+  touch-action: none;
+}
+
+.notif-modal.hidden {
+  display: none;
+}
+
+.notif-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    rgba(0,0,0,.55);
+
+  backdrop-filter: blur(4px);
+}
+
+.notif-box {
+  position: relative;
+
+  width: min(92%, 420px);
+
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  background: var(--card);
+
+  animation:
+    notifPop .25s ease;
+}
+
+.notif-box img {
+  width: 100%;
+
+  display: block;
+}
+
+.notif-close {
+  position: absolute;
+
+  top: 12px;
+  right: 12px;
+
+  width: 38px;
+  height: 38px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background:
+    rgba(0,0,0,.5);
+
+  color: #fff;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  z-index: 2;
+}
+
+@keyframes notifPop {
+
+  from {
+    opacity: 0;
+
+    transform:
+      scale(.9)
+      translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      scale(1)
+      translateY(0);
+  }
+}
+
+.notif-box {
+  position: relative;
+
+  width: min(92%, 420px);
+
+  aspect-ratio: 3 / 4;
+
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  background: var(--card);
+
+  animation:
+    notifPop .25s ease;
+}
+
+.notif-slider {
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+}
+
+.notif-track {
+  display: flex;
+
+  width: 100%;
+  height: 100%;
+
+  transition:
+    transform .45s ease;
+}
+
+.notif-slide {
+  min-width: 100%;
+  height: 100%;
+}
+
+.notif-slide img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+.notif-dots {
+  position: absolute;
+
+  left: 50%;
+  bottom: 16px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 8px;
+
+  z-index: 3;
+}
+
+.notif-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255,255,255,.45);
+
+  transition:
+    all .25s ease;
+}
+
+.notif-dot.active {
+  width: 22px;
+
+  background: #fff;
+}
+
+.notif-track {
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.notif-track:active {
+  cursor: grabbing;
+}
+
+.notif-slide a {
+  display: block;
+
+  width: 100%;
+  height: 100%;
 }

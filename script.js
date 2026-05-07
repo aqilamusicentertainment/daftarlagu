@@ -1,19 +1,5 @@
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxGgt3eaYxFNT7pLgyWueHkYQ0iCYoxgtXrSTauE11opVboALhV8uZE7lt8-pb-csU0/exec";
-
-const CONFIG = {
-  pins: {
-    player: "1234",
-    vocal: "5678"
-  },
-
-  spreadsheetId:
-    "1nA6shX7I1KVkXl9LuD-aYwxRA_DL-X9E2JiLCMypVp4",
-
-  songSheet: "DAFTAR_LAGU",
-
-  requestSheet: "DAFTAR_REQUEST"
-};
+  "https://script.google.com/macros/s/AKfycbxzZYe5BaTzMgElWDM_MAj6KsnMI4geBGBeO6JdCJCQXzRPDxhmSyKe5LCshSMD1yOU/exec";
 
 const ITEMS_PER_PAGE = 10;
 const SONGS_PER_PAGE = 10;
@@ -21,6 +7,7 @@ const SONGS_PER_PAGE = 10;
 let currentRequestPage = 1;
 
 let allSongData = [];
+let allRequestData = [];
 
 let currentRole = "";
 
@@ -31,6 +18,31 @@ let currentSongKeyword = "";
 let currentSongCategory = "all";
 
 let currentSongPages = {};
+
+let notificationImages = [];
+
+let currentNotifIndex = 0;
+
+let notifInterval = null;
+
+let notifResumeTimeout = null;
+
+let isDragging = false;
+
+let notifStartX = 0;
+
+let notifMoveX = 0;
+let notifDragged = false;
+
+const notifTrack =
+  document.getElementById(
+    "notifTrack"
+  );
+
+const notifDots =
+  document.getElementById(
+    "notifDots"
+  );
 
 const loginPage =
   document.getElementById("loginPage");
@@ -187,7 +199,7 @@ filterOptions.forEach(option => {
         "active"
       );
 
-      loadRequestData();
+      renderRequestTable(allRequestData);
 
       scrollToTop();
     }
@@ -215,6 +227,71 @@ document.addEventListener(
   }
 );
 
+function updateNotifSlider() {
+
+  notifTrack.style.transform =
+    `translateX(-${currentNotifIndex * 100}%)`;
+
+  document
+    .querySelectorAll(".notif-dot")
+    .forEach((dot, index) => {
+
+      dot.classList.toggle(
+        "active",
+        index ===
+        (
+          currentNotifIndex %
+          notificationImages.length
+        )
+      );
+    });
+}
+
+function startNotifAutoplay() {
+
+  clearInterval(notifInterval);
+
+  if (
+    notificationImages.length <= 1
+  ) return;
+
+  notifInterval =
+    setInterval(() => {
+
+      currentNotifIndex++;
+
+      if (
+        currentNotifIndex >=
+        notificationImages.length
+      ) {
+
+        currentNotifIndex = 0;
+      }
+
+      notifTrack.style.transition =
+        "transform .45s ease";
+
+      updateNotifSlider();
+
+    }, 3000);
+}
+
+function pauseNotifAutoplay() {
+
+  clearInterval(notifInterval);
+
+  clearTimeout(
+    notifResumeTimeout
+  );
+
+  notifResumeTimeout =
+    setTimeout(() => {
+
+      startNotifAutoplay();
+
+    }, 10000);
+}
+
 if (requestSearch) {
 
   requestSearch.addEventListener(
@@ -228,7 +305,7 @@ if (requestSearch) {
 
       currentRequestPage = 1;
 
-      loadRequestData();
+      renderRequestTable(allRequestData);
 
       scrollToTop();
     }
@@ -256,21 +333,115 @@ loginForm.addEventListener(
       return;
     }
 
-    if (CONFIG.pins[role] !== pin) {
+    const submitBtn =
+      loginForm.querySelector("button");
 
-      alert("PIN salah");
+    submitBtn.disabled = true;
 
-      return;
+    submitBtn.innerHTML = `
+      <i class="ri-loader-4-line rotating"></i>
+      Memeriksa...
+    `;
+
+    try {
+
+      const response =
+        await fetch(
+          SCRIPT_URL,
+          {
+            method: "POST",
+
+            body: JSON.stringify({
+              action: "login",
+              role,
+              pin
+            })
+          }
+        );
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+
+        alert("PIN salah");
+
+        submitBtn.disabled = false;
+
+        submitBtn.innerText =
+          "Masuk";
+
+        return;
+      }
+
+      localStorage.setItem(
+        "aqila_role",
+        role
+      );
+
+      alert(
+        "Login berhasil 🔥"
+      );
+
+      setTimeout(() => {
+
+        showApp(role);
+
+      }, 300);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Gagal login");
+
+      submitBtn.disabled = false;
+
+      submitBtn.innerText =
+        "Masuk";
     }
-
-    localStorage.setItem(
-      "aqila_role",
-      role
-    );
-
-    showApp(role);
   }
 );
+
+async function loadNotification() {
+
+  try {
+
+    const response =
+      await fetch(
+        SCRIPT_URL,
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+            action: "notification"
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    notificationImages =
+      data.images || [];
+
+    notificationImages.forEach(item => {
+
+      const preload =
+        new Image();
+
+      preload.src =
+        item.image;
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Notif gagal dimuat",
+      error
+    );
+  }
+}
 
 function showApp(role) {
 
@@ -295,17 +466,36 @@ function showApp(role) {
   loadSongData(role);
 
   loadRequestData();
+  loadNotification();
 }
 
 async function loadSongData(role) {
 
-  const url =
-    `https://opensheet.elk.sh/${CONFIG.spreadsheetId}/${CONFIG.songSheet}`;
+if (!allSongData.length) {
+
+  songTables.innerHTML = `
+    <div class="table-card">
+      <div class="loading-state">
+        <i class="ri-loader-4-line rotating"></i>
+        Memuat daftar lagu...
+      </div>
+    </div>
+  `;
+}
 
   try {
 
     const response =
-      await fetch(url);
+      await fetch(
+        SCRIPT_URL,
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+            action: "songs"
+          })
+        }
+      );
 
     const data =
       await response.json();
@@ -712,18 +902,47 @@ function applySongFilter() {
 
 async function loadRequestData() {
 
-  const url =
-    `https://opensheet.elk.sh/${CONFIG.spreadsheetId}/${CONFIG.requestSheet}`;
+if (!requestBody.innerHTML.trim()) {
+
+  requestBody.innerHTML = `
+    <tr>
+
+      <td colspan="4">
+
+        <div class="loading-state">
+
+          <i class="ri-loader-4-line rotating"></i>
+
+          Memuat daftar request...
+
+        </div>
+
+      </td>
+
+    </tr>
+  `;
+}
 
   try {
 
     const response =
-      await fetch(url);
+      await fetch(
+        SCRIPT_URL,
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+            action: "requests"
+          })
+        }
+      );
 
     const data =
       await response.json();
 
-    renderRequestTable(data);
+    allRequestData = data;
+
+    renderRequestTable(allRequestData);
 
   } catch (error) {
 
@@ -731,13 +950,14 @@ async function loadRequestData() {
 
     requestBody.innerHTML = `
       <tr>
-        <td colspan="10">
+        <td colspan="4">
           Gagal memuat request
         </td>
       </tr>
     `;
   }
 }
+
 function renderRequestTable(data) {
 
   const keys = [
@@ -762,7 +982,7 @@ function renderRequestTable(data) {
 
     requestBody.innerHTML = `
       <tr>
-        <td colspan="10">
+        <td colspan="4">
           Belum ada request
         </td>
       </tr>
@@ -852,10 +1072,29 @@ function renderRequestTable(data) {
       const td =
         document.createElement("td");
 
-      const value =
-        item[key]?.trim()
-          ? item[key]
-          : "-";
+      let value =
+        item[key] || "-";
+
+      if (key === "Waktu") {
+
+        const date =
+          new Date(value);
+
+        if (!isNaN(date)) {
+
+          value =
+            date.toLocaleString(
+              "id-ID",
+              {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+              }
+            );
+        }
+      }
 
       td.textContent = value;
 
@@ -938,7 +1177,7 @@ function renderRequestPagination(totalItems) {
 
     currentRequestPage--;
 
-    loadRequestData();
+    renderRequestTable(allRequestData);
 
     scrollToTop();
   };
@@ -986,7 +1225,7 @@ function renderRequestPagination(totalItems) {
 
     currentRequestPage++;
 
-    loadRequestData();
+    renderRequestTable(allRequestData);
 
     scrollToTop();
   };
@@ -1011,7 +1250,7 @@ function renderRequestPagination(totalItems) {
 
       currentRequestPage = page;
 
-      loadRequestData();
+      renderRequestTable(allRequestData);
 
       scrollToTop();
     };
@@ -1174,7 +1413,7 @@ requestForm.addEventListener(
     const now = Date.now();
 
     const cooldown =
-      1 * 30 * 1000;
+      1 * 60 * 1000;
 
     if (lastRequest) {
 
@@ -1267,22 +1506,22 @@ requestForm.addEventListener(
       requestBtn.innerText =
         "Mengirim...";
 
-      await fetch(
-        SCRIPT_URL,
-        {
-          method: "POST",
+    await fetch(
+      SCRIPT_URL,
+      {
+        method: "POST",
 
-          mode: "no-cors",
+        body: JSON.stringify({
+          action: "addRequest",
 
-          body: JSON.stringify({
-            namaLagu,
-            catatan,
+          namaLagu,
+          catatan,
 
-            requestBy:
-              roleLabel[role]
-          })
-        }
-      );
+          requestBy:
+            roleLabel[role]
+        })
+      }
+    );
 
       localStorage.setItem(
         "aqila_last_request",
@@ -1454,13 +1693,19 @@ setInterval(() => {
 
   loadSongData(role);
 
-  const currentPageBackup =
-    currentRequestPage;
+  if (
+    !currentRequestKeyword &&
+    requestSortMode === "newest"
+  ) {
 
-  loadRequestData();
+    const currentPageBackup =
+      currentRequestPage;
 
-  currentRequestPage =
-    currentPageBackup;
+    loadRequestData();
+
+    currentRequestPage =
+      currentPageBackup;
+  }
 
 }, 5000);
 
@@ -1522,7 +1767,7 @@ function updateRequestCooldown() {
   }
 
   const cooldown =
-    1 * 30 * 1000;
+    1 * 60 * 1000;
 
   const now = Date.now();
 
@@ -1559,6 +1804,286 @@ function updateRequestCooldown() {
       .toString()
       .padStart(2, "0")}`;
 }
+
+const notifModal =
+  document.getElementById(
+    "notifModal"
+  );
+
+const notifImage =
+  document.getElementById(
+    "notifImage"
+  );
+
+const notifClose =
+  document.getElementById(
+    "notifClose"
+  );
+
+const notifBtn =
+  document.querySelector(
+    ".ri-notification-3-line"
+  ).parentElement;
+
+notifBtn.addEventListener(
+  "click",
+  () => {
+
+    if (!notificationImages.length) {
+
+      alert(
+        "Notifikasi belum tersedia"
+      );
+
+      return;
+    }
+
+    currentNotifIndex = 0;
+
+    notifTrack.innerHTML = "";
+
+    notifDots.innerHTML = "";
+
+    notificationImages.forEach(
+      (src, index) => {
+
+        const slide =
+          document.createElement("div");
+
+        slide.className =
+          "notif-slide";
+
+        if (src.link) {
+
+          slide.innerHTML = `
+            <a
+              href="${src.link}"
+              target="_blank"
+            >
+              <img
+                src="${src.image}"
+                draggable="false"
+              >
+            </a>
+          `;
+
+        } else {
+
+          slide.innerHTML = `
+            <img
+              src="${src.image}"
+              draggable="false"
+            >
+          `;
+        }
+
+        notifTrack.appendChild(
+          slide
+        );
+
+        const dot =
+          document.createElement("div");
+
+        dot.className =
+          "notif-dot";
+
+        if (index === 0) {
+
+          dot.classList.add(
+            "active"
+          );
+        }
+
+        dot.addEventListener(
+          "click",
+          () => {
+
+            currentNotifIndex = index;
+
+            notifTrack.style.transition =
+              "transform .45s ease";
+
+            updateNotifSlider();
+
+            pauseNotifAutoplay();
+          }
+        );
+
+        notifDots.appendChild(dot);
+      }
+    );
+
+    updateNotifSlider();
+
+    notifModal.classList.remove(
+      "hidden"
+    );
+
+    clearInterval(notifInterval);
+
+    if (
+      notificationImages.length > 1
+    ) {
+
+      startNotifAutoplay();
+    }
+  }
+);
+
+notifClose.addEventListener(
+  "click",
+  () => {
+
+    notifModal.classList.add(
+      "hidden"
+    );
+
+    clearInterval(
+      notifInterval
+    );
+  }
+);
+
+function notifPointerStart(x) {
+
+  isDragging = true;
+
+  notifDragged = false;
+
+  notifStartX = x;
+
+  notifMoveX = x;
+
+  pauseNotifAutoplay();
+}
+
+function notifPointerMove(x) {
+
+  if (!isDragging) return;
+
+  notifMoveX = x;
+
+  if (
+    Math.abs(
+      notifStartX - notifMoveX
+    ) > 10
+  ) {
+
+    notifDragged = true;
+  }
+}
+
+function notifPointerEnd() {
+
+  if (!isDragging) return;
+
+  isDragging = false;
+
+  const diff =
+    notifStartX - notifMoveX;
+
+  if (Math.abs(diff) < 50) return;
+
+  if (diff > 0) {
+
+    currentNotifIndex++;
+
+  if (
+    currentNotifIndex >=
+    notificationImages.length
+  ) {
+
+    currentNotifIndex = 0;
+  }
+
+  } else {
+
+    currentNotifIndex--;
+
+    if (currentNotifIndex < 0) {
+
+      currentNotifIndex = 0;
+    }
+  }
+
+  notifTrack.style.transition =
+    "transform .45s ease";
+
+  updateNotifSlider();
+
+  setTimeout(() => {
+
+    notifDragged = false;
+
+  }, 50);
+}
+
+notifTrack.addEventListener(
+  "touchstart",
+  (e) => {
+
+    notifPointerStart(
+      e.touches[0].clientX
+    );
+  }
+);
+
+notifTrack.addEventListener(
+  "touchmove",
+  (e) => {
+
+    notifPointerMove(
+      e.touches[0].clientX
+    );
+  }
+);
+
+notifTrack.addEventListener(
+  "touchend",
+  notifPointerEnd
+);
+
+notifTrack.addEventListener(
+  "mousedown",
+  (e) => {
+
+    e.preventDefault();
+
+    notifPointerStart(
+      e.clientX
+    );
+  }
+);
+
+notifTrack.addEventListener(
+  "mousemove",
+  (e) => {
+
+    if (!isDragging) return;
+
+    e.preventDefault();
+
+    notifPointerMove(
+      e.clientX
+    );
+  }
+);
+
+notifTrack.addEventListener(
+  "mouseup",
+  notifPointerEnd
+);
+
+notifTrack.addEventListener(
+  "mouseleave",
+  () => {
+
+    if (isDragging) {
+
+      notifPointerEnd();
+    }
+  }
+);
 
 setInterval(
   updateRequestCooldown,
