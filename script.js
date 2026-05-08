@@ -1,9 +1,6 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzHHhREDEY_fU4SLpRkbtLrbNghUYRGOTzIjvFaO8mD2gAtAWPSv-Nw4AX0Aa6VRBhg/exec";
 
-const ITEMS_PER_PAGE = 10;
-const SONGS_PER_PAGE = 10;
-
 let currentRequestPage = 1;
 
 let allSongData = [];
@@ -34,6 +31,11 @@ let notifStartX = 0;
 let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
+
+const SESSION_TIMEOUT =
+  15 * 60 * 1000;
+
+let sessionTimer = null;
 
 const notifTrack =
   document.getElementById(
@@ -105,7 +107,12 @@ const filterOptions =
     ".filter-option"
   );
 
-requestFilter.addEventListener(
+const requestSelected =
+  requestFilter.querySelector(
+    ".filter-selected"
+  );
+
+requestSelected.addEventListener(
   "click",
   (e) => {
 
@@ -227,6 +234,40 @@ document.addEventListener(
     );
   }
 );
+
+function getItemsPerPage() {
+
+  const h =
+    window.innerHeight;
+
+  if (h <= 700) {
+
+    return 5;
+
+  } else if (h <= 900) {
+
+    return 7;
+  }
+
+  return 10;
+}
+
+function getSongsPerPage() {
+
+  const h =
+    window.innerHeight;
+
+  if (h <= 700) {
+
+    return 5;
+
+  } else if (h <= 900) {
+
+    return 7;
+  }
+
+  return 10;
+}
 
 function updateNotifSlider() {
 
@@ -468,6 +509,7 @@ function showApp(role) {
 
   loadRequestData();
   loadNotification();
+  initSessionListener();
 }
 
 async function loadSongData(role) {
@@ -611,10 +653,10 @@ function renderTable(data, role) {
 
     const start =
       (currentPage - 1)
-      * SONGS_PER_PAGE;
+      * getSongsPerPage();
 
     const end =
-      start + SONGS_PER_PAGE;
+      start + getSongsPerPage();
 
     const paginatedData =
       filteredData.slice(start, end);
@@ -716,7 +758,7 @@ function renderTable(data, role) {
     const totalPages =
       Math.ceil(
         filteredData.length /
-        SONGS_PER_PAGE
+        getSongsPerPage()
       );
 
     if (totalPages > 1) {
@@ -1049,16 +1091,19 @@ function renderRequestTable(data) {
     });
   }
 
-  if (requestSortMode === "newest") {
-    data.reverse();
-  }
+data = [...data];
+
+if (requestSortMode === "newest") {
+
+  data.reverse();
+}
 
   const start =
     (currentRequestPage - 1)
-    * ITEMS_PER_PAGE;
+    * getItemsPerPage();
 
   const end =
-    start + ITEMS_PER_PAGE;
+    start + getItemsPerPage();
 
   const paginatedData =
     data.slice(start, end);
@@ -1149,10 +1194,10 @@ function renderRequestPagination(totalItems) {
 
   const totalPages =
     Math.ceil(
-      totalItems / ITEMS_PER_PAGE
+      totalItems / getItemsPerPage()
     );
 
-  if (totalItems <= ITEMS_PER_PAGE) {
+  if (totalItems <= getItemsPerPage()) {
 
     pagination.classList.add(
       "hidden"
@@ -2200,6 +2245,52 @@ if ("serviceWorker" in navigator) {
         console.log("PWA aktif");
       });
   });
+}
+
+function resetSessionTimer() {
+
+  clearTimeout(sessionTimer);
+
+  const role =
+    localStorage.getItem(
+      "aqila_role"
+    );
+
+  if (!role) return;
+
+  sessionTimer =
+    setTimeout(() => {
+
+      alert(
+        "Sesi berakhir, silakan login kembali"
+      );
+
+      localStorage.removeItem(
+        "aqila_role"
+      );
+
+      location.reload();
+
+    }, SESSION_TIMEOUT);
+}
+
+function initSessionListener() {
+
+  [
+    "click",
+    "touchstart",
+    "mousemove",
+    "keydown",
+    "scroll"
+  ].forEach(event => {
+
+    document.addEventListener(
+      event,
+      resetSessionTimer
+    );
+  });
+
+  resetSessionTimer();
 }
 
 updateRequestCooldown();
