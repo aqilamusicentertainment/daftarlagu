@@ -1,6 +1,8 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzHHhREDEY_fU4SLpRkbtLrbNghUYRGOTzIjvFaO8mD2gAtAWPSv-Nw4AX0Aa6VRBhg/exec";
 
+const ITEMS_PER_PAGE = 10;
+
 let currentRequestPage = 1;
 
 let allSongData = [];
@@ -13,8 +15,6 @@ let currentRequestKeyword = "";
 
 let currentSongKeyword = "";
 let currentSongCategory = "all";
-
-let currentSongPages = {};
 
 let notificationImages = [];
 
@@ -31,11 +31,6 @@ let notifStartX = 0;
 let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
-
-const SESSION_TIMEOUT =
-  15 * 60 * 1000;
-
-let sessionTimer = null;
 
 const notifTrack =
   document.getElementById(
@@ -107,12 +102,7 @@ const filterOptions =
     ".filter-option"
   );
 
-const requestSelected =
-  requestFilter.querySelector(
-    ".filter-selected"
-  );
-
-requestSelected.addEventListener(
+requestFilter.addEventListener(
   "click",
   (e) => {
 
@@ -229,45 +219,14 @@ document.addEventListener(
       );
     }
 
-    customSelect.classList.remove(
-      "active"
-    );
+    if (customSelect) {
+
+  customSelect.classList.remove(
+    "active"
+  );
+}
   }
 );
-
-function getItemsPerPage() {
-
-  const h =
-    window.innerHeight;
-
-  if (h <= 700) {
-
-    return 5;
-
-  } else if (h <= 900) {
-
-    return 7;
-  }
-
-  return 10;
-}
-
-function getSongsPerPage() {
-
-  const h =
-    window.innerHeight;
-
-  if (h <= 700) {
-
-    return 5;
-
-  } else if (h <= 900) {
-
-    return 7;
-  }
-
-  return 10;
-}
 
 function updateNotifSlider() {
 
@@ -509,7 +468,6 @@ function showApp(role) {
 
   loadRequestData();
   loadNotification();
-  initSessionListener();
 }
 
 async function loadSongData(role) {
@@ -648,18 +606,8 @@ function renderTable(data, role) {
       return;
     }
 
-    const currentPage =
-      currentSongPages[category] || 1;
-
-    const start =
-      (currentPage - 1)
-      * getSongsPerPage();
-
-    const end =
-      start + getSongsPerPage();
-
     const paginatedData =
-      filteredData.slice(start, end);
+      filteredData;
 
     const table =
       document.createElement("table");
@@ -697,10 +645,15 @@ function renderTable(data, role) {
         const td =
           document.createElement("td");
 
-        const value =
-          item[key]?.trim()
-            ? item[key]
-            : "-";
+        const raw =
+  item[key];
+
+const value =
+  raw !== undefined &&
+  raw !== null &&
+  String(raw).trim() !== ""
+    ? raw
+    : "-";
 
         if (key === "Catatan") {
 
@@ -755,135 +708,6 @@ function renderTable(data, role) {
 
     card.appendChild(wrapper);
 
-    const totalPages =
-      Math.ceil(
-        filteredData.length /
-        getSongsPerPage()
-      );
-
-    if (totalPages > 1) {
-
-      const pagination =
-        document.createElement("div");
-
-      pagination.className =
-        "pagination";
-
-      const prevBtn =
-        document.createElement("button");
-
-      prevBtn.innerHTML =
-        '<i class="ri-arrow-left-s-line"></i>';
-
-      prevBtn.disabled =
-        currentPage === 1;
-
-      prevBtn.onclick = () => {
-
-        currentSongPages[category]--;
-
-        applySongFilter();
-
-        scrollToTop();
-      };
-
-      pagination.appendChild(prevBtn);
-
-      addSongPageButton(1);
-
-      if (currentPage > 3) {
-
-        addSongDots();
-      }
-
-      if (
-        currentPage !== 1 &&
-        currentPage !== totalPages
-      ) {
-
-        addSongPageButton(
-          currentPage
-        );
-      }
-
-      if (
-        currentPage <=
-        totalPages - 2
-      ) {
-
-        addSongDots();
-      }
-
-      if (totalPages > 1) {
-
-        addSongPageButton(
-          totalPages
-        );
-      }
-
-      const nextBtn =
-        document.createElement("button");
-
-      nextBtn.innerHTML =
-        '<i class="ri-arrow-right-s-line"></i>';
-
-      nextBtn.disabled =
-        currentPage === totalPages;
-
-      nextBtn.onclick = () => {
-
-        currentSongPages[category]++;
-
-        applySongFilter();
-
-        scrollToTop();
-      };
-
-      pagination.appendChild(nextBtn);
-
-      card.appendChild(pagination);
-
-      function addSongPageButton(page) {
-
-        const btn =
-          document.createElement("button");
-
-        btn.innerText = page;
-
-        if (page === currentPage) {
-
-          btn.classList.add(
-            "active"
-          );
-        }
-
-        btn.onclick = () => {
-
-          currentSongPages[category] =
-            page;
-
-          applySongFilter();
-
-          scrollToTop();
-        };
-
-        pagination.appendChild(btn);
-      }
-
-      function addSongDots() {
-
-        const dots =
-          document.createElement("span");
-
-        dots.className =
-          "pagination-dots";
-
-        dots.innerText = "...";
-
-        pagination.appendChild(dots);
-      }
-    }
-
     songTables.appendChild(card);
   });
 }
@@ -910,18 +734,6 @@ function applySongFilter() {
 
   let filtered =
     [...allSongData];
-
-  if (
-    currentSongCategory !== "all"
-  ) {
-
-    filtered =
-      filtered.filter(item =>
-
-        item["Kategori"] ===
-        currentSongCategory
-      );
-  }
 
   if (currentSongKeyword) {
 
@@ -1100,10 +912,10 @@ if (requestSortMode === "newest") {
 
   const start =
     (currentRequestPage - 1)
-    * getItemsPerPage();
+    * ITEMS_PER_PAGE;
 
   const end =
-    start + getItemsPerPage();
+    start + ITEMS_PER_PAGE;
 
   const paginatedData =
     data.slice(start, end);
@@ -1194,10 +1006,10 @@ function renderRequestPagination(totalItems) {
 
   const totalPages =
     Math.ceil(
-      totalItems / getItemsPerPage()
+      totalItems / ITEMS_PER_PAGE
     );
 
-  if (totalItems <= getItemsPerPage()) {
+  if (totalItems <= ITEMS_PER_PAGE) {
 
     pagination.classList.add(
       "hidden"
@@ -1689,17 +1501,20 @@ const options =
     ".select-option"
   );
 
-customSelect.addEventListener(
-  "click",
-  (e) => {
+if (customSelect) {
 
-    e.stopPropagation();
+  customSelect.addEventListener(
+    "click",
+    (e) => {
 
-    customSelect.classList.toggle(
-      "active"
-    );
-  }
-);
+      e.stopPropagation();
+
+      customSelect.classList.toggle(
+        "active"
+      );
+    }
+  );
+}
 
 options.forEach(option => {
 
@@ -1727,33 +1542,6 @@ options.forEach(option => {
     }
   );
 });
-
-setInterval(() => {
-
-  const role =
-    localStorage.getItem(
-      "aqila_role"
-    );
-
-  if (!role) return;
-
-  loadSongData(role);
-
-  if (
-    !currentRequestKeyword &&
-    requestSortMode === "newest"
-  ) {
-
-    const currentPageBackup =
-      currentRequestPage;
-
-    loadRequestData();
-
-    currentRequestPage =
-      currentPageBackup;
-  }
-
-}, 5000);
 
 const namaLaguInput =
   document.getElementById(
@@ -2245,52 +2033,6 @@ if ("serviceWorker" in navigator) {
         console.log("PWA aktif");
       });
   });
-}
-
-function resetSessionTimer() {
-
-  clearTimeout(sessionTimer);
-
-  const role =
-    localStorage.getItem(
-      "aqila_role"
-    );
-
-  if (!role) return;
-
-  sessionTimer =
-    setTimeout(() => {
-
-      alert(
-        "Sesi berakhir, silakan login kembali"
-      );
-
-      localStorage.removeItem(
-        "aqila_role"
-      );
-
-      location.reload();
-
-    }, SESSION_TIMEOUT);
-}
-
-function initSessionListener() {
-
-  [
-    "click",
-    "touchstart",
-    "mousemove",
-    "keydown",
-    "scroll"
-  ].forEach(event => {
-
-    document.addEventListener(
-      event,
-      resetSessionTimer
-    );
-  });
-
-  resetSessionTimer();
 }
 
 updateRequestCooldown();
