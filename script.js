@@ -29,6 +29,10 @@ let notifStartX = 0;
 let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
+const SESSION_TIMEOUT =
+  15 * 60 * 1000;
+
+let sessionTimer = null;
 
 const notifTrack =
   document.getElementById(
@@ -484,6 +488,7 @@ function showApp(role) {
 
   loadRequestData();
   loadNotification();
+  initSessionListener();
 }
 
 async function loadSongData(role) {
@@ -2082,6 +2087,52 @@ if ("serviceWorker" in navigator) {
 }
 
 updateRequestCooldown();
+
+function resetSessionTimer() {
+
+  clearTimeout(sessionTimer);
+
+  const role =
+    localStorage.getItem(
+      "aqila_role"
+    );
+
+  if (!role) return;
+
+  sessionTimer =
+    setTimeout(() => {
+
+      alert(
+        "Sesi berakhir, silakan login kembali"
+      );
+
+      localStorage.removeItem(
+        "aqila_role"
+      );
+
+      location.reload();
+
+    }, SESSION_TIMEOUT);
+}
+
+function initSessionListener() {
+
+  [
+    "click",
+    "touchstart",
+    "mousemove",
+    "keydown",
+    "scroll"
+  ].forEach(event => {
+
+    document.addEventListener(
+      event,
+      resetSessionTimer
+    );
+  });
+
+  resetSessionTimer();
+}
 
 window.addEventListener(
   "resize",
