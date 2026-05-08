@@ -1037,7 +1037,11 @@ function renderRequestPagination(totalItems) {
 
     renderRequestTable(allRequestData);
 
-    scrollToTop();
+    scrollToTop(
+  document.getElementById(
+    "requestSection"
+  )
+);
   };
 
   pagination.appendChild(prevBtn);
@@ -1085,7 +1089,11 @@ function renderRequestPagination(totalItems) {
 
     renderRequestTable(allRequestData);
 
-    scrollToTop();
+    scrollToTop(
+      document.getElementById(
+        "requestSection"
+      )
+    );
   };
 
   pagination.appendChild(nextBtn);
@@ -1110,7 +1118,11 @@ function renderRequestPagination(totalItems) {
 
       renderRequestTable(allRequestData);
 
-      scrollToTop();
+      scrollToTop(
+  document.getElementById(
+    "requestSection"
+  )
+);
     };
 
     pagination.appendChild(btn);
@@ -1130,7 +1142,25 @@ function renderRequestPagination(totalItems) {
   }
 }
 
-function scrollToTop() {
+function scrollToTop(
+  target = null
+) {
+
+  if (target) {
+
+const y =
+  target.getBoundingClientRect()
+    .top +
+  window.pageYOffset +
+  30;
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth"
+    });
+
+    return;
+  }
 
   window.scrollTo({
     top: 0,
