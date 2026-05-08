@@ -1,4 +1,4 @@
-const CACHE_NAME = "aqila-music-v1";
+const CACHE_NAME = "aqila-music-v2";
 
 const urlsToCache = [
   "./",
