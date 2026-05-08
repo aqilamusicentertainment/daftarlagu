@@ -1,8 +1,6 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzHHhREDEY_fU4SLpRkbtLrbNghUYRGOTzIjvFaO8mD2gAtAWPSv-Nw4AX0Aa6VRBhg/exec";
 
-const ITEMS_PER_PAGE = 10;
-
 let currentRequestPage = 1;
 
 let allSongData = [];
@@ -227,6 +225,24 @@ document.addEventListener(
 }
   }
 );
+
+function getItemsPerPage() {
+
+  const h =
+    window.innerHeight;
+
+  if (h <= 700) {
+
+    return 5;
+  }
+
+  if (h <= 850) {
+
+    return 7;
+  }
+
+  return 10;
+}
 
 function updateNotifSlider() {
 
@@ -912,10 +928,10 @@ if (requestSortMode === "newest") {
 
   const start =
     (currentRequestPage - 1)
-    * ITEMS_PER_PAGE;
+    * getItemsPerPage();
 
   const end =
-    start + ITEMS_PER_PAGE;
+    start + getItemsPerPage();
 
   const paginatedData =
     data.slice(start, end);
@@ -1006,10 +1022,10 @@ function renderRequestPagination(totalItems) {
 
   const totalPages =
     Math.ceil(
-      totalItems / ITEMS_PER_PAGE
+      totalItems / getItemsPerPage()
     );
 
-  if (totalItems <= ITEMS_PER_PAGE) {
+  if (totalItems <= getItemsPerPage()) {
 
     pagination.classList.add(
       "hidden"
@@ -2066,3 +2082,13 @@ if ("serviceWorker" in navigator) {
 }
 
 updateRequestCooldown();
+
+window.addEventListener(
+  "resize",
+  () => {
+
+    renderRequestTable(
+      allRequestData
+    );
+  }
+);
