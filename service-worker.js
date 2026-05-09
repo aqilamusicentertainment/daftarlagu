@@ -1,11 +1,11 @@
 const CACHE_NAME =
-  "aqila-v02";
+  "aqila-v03";
 
 const urlsToCache = [
   "./",
   "./index.html",
-  "./style.css?v=02",
-  "./script.js?v=02",
+  "./style.css?v=03",
+  "./script.js?v=03",
   "./icon.png"
 ];
 

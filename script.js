@@ -1,5 +1,5 @@
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzHHhREDEY_fU4SLpRkbtLrbNghUYRGOTzIjvFaO8mD2gAtAWPSv-Nw4AX0Aa6VRBhg/exec";
+  "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
 
 let currentRequestPage = 1;
 
