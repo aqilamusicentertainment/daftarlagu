@@ -1,5 +1,5 @@
 const APP_VERSION =
-  "v1.0.5";
+  "v1.0.6";
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
@@ -256,9 +256,14 @@ function getItemsPerPage() {
     return 5;
   }
 
-  if (h <= 850) {
+  if (h <= 800) {
 
     return 7;
+  }
+
+  if (h <= 900) {
+
+    return 8;
   }
 
   return 10;
@@ -462,6 +467,58 @@ async function loadNotification() {
     notificationImages =
       data.images || [];
 
+    const notifBadge =
+      document.getElementById(
+        "notifBadge"
+      );
+
+    if (notifBadge) {
+
+      const total =
+        notificationImages.length;
+
+      notifBadge.innerText =
+        total;
+
+const oldCount =
+  Number(
+    notifBadge.dataset.count || 0
+  );
+
+notifBadge.dataset.count =
+  total;
+
+if (total > 0) {
+
+  notifBadge.style.display =
+    "flex";
+
+  notifBadge.innerText =
+    total;
+
+  notifBadge.style.animation =
+    "none";
+
+  notifBadge.offsetHeight;
+
+  if (oldCount === 0) {
+
+    notifBadge.style.animation =
+      "notifAppear .45s ease";
+
+  } else if (oldCount !== total) {
+
+    notifBadge.style.animation =
+      "notifUpdate .35s ease";
+  }
+
+} else {
+
+  notifBadge.style.display =
+    "none";
+}
+    }
+
     notificationImages.forEach(item => {
 
       const preload =
@@ -539,10 +596,27 @@ if (!songLoaded) {
     const data =
       await response.json();
 
-    allSongData = data;
-    songLoaded = true;
+    const newData =
+      JSON.stringify(data);
 
-    applySongFilter();
+    const oldData =
+      JSON.stringify(allSongData);
+
+    if (newData !== oldData) {
+
+      allSongData = data;
+
+      applySongFilter();
+    }
+
+if (newData !== oldData) {
+
+  allSongData = data;
+
+  applySongFilter();
+}
+
+songLoaded = true;
 
   } catch (error) {
 
@@ -1358,6 +1432,11 @@ const requestForm =
     "requestForm"
   );
 
+function isValidInput(text) {
+
+  return /^[a-zA-Z0-9\s\-()+±#\/.,]+$/.test(text);
+}
+
 requestForm.addEventListener(
   "submit",
   async (e) => {
@@ -1423,6 +1502,15 @@ requestForm.addEventListener(
       return;
     }
 
+if (!isValidInput(namaLagu)) {
+
+  alert(
+    "Nama lagu berisi karakter yang tidak didukung"
+  );
+
+  return;
+}
+
     if (namaLagu.length > 30) {
 
       alert(
@@ -1431,6 +1519,18 @@ requestForm.addEventListener(
 
       return;
     }
+
+if (
+  catatan &&
+  !isValidInput(catatan)
+) {
+
+  alert(
+    "Catatan berisi karakter yang tidak didukung"
+  );
+
+  return;
+}
 
     if (catatan.length > 100) {
 
@@ -1533,6 +1633,47 @@ const themeToggleApp =
     "themeToggleApp"
   );
 
+function updateThemeIcon(
+  animate = false
+) {
+
+  const isDark =
+    document.body.classList.contains(
+      "dark"
+    );
+
+  const icons =
+    [
+      themeToggle,
+      themeToggleApp
+    ];
+
+  icons.forEach(btn => {
+
+    if (!btn) return;
+
+    btn.innerHTML =
+      isDark
+        ? '<i class="ri-moon-line"></i>'
+        : '<i class="ri-sun-line"></i>';
+        const icon =
+      btn.querySelector("i");
+
+      if (animate) {
+
+        icon.classList.remove(
+          "theme-icon-animate"
+        );
+
+        icon.offsetHeight;
+
+        icon.classList.add(
+          "theme-icon-animate"
+        );
+      }
+  });
+}
+
 function toggleTheme() {
 
   document.body.classList.toggle(
@@ -1548,6 +1689,7 @@ function toggleTheme() {
     "aqila_theme",
     isDark ? "dark" : "light"
   );
+  updateThemeIcon(true);
 }
 
 if (themeToggle) {
@@ -1581,6 +1723,8 @@ window.addEventListener(
         "dark"
       );
     }
+
+    updateThemeIcon();
   }
 );
 
@@ -1655,6 +1799,17 @@ const catatanInput =
   document.getElementById(
     "catatan"
   );
+
+catatanInput.addEventListener(
+  "keydown",
+  (e) => {
+
+    if (e.key === "Enter") {
+
+      e.preventDefault();
+    }
+  }
+);
 
 const namaCounter =
   document.getElementById(
@@ -2137,6 +2292,8 @@ setInterval(() => {
   loadRequestData();
 
   loadSongData(role);
+
+  loadNotification();
 
 }, 5000);
 
