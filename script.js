@@ -1,5 +1,5 @@
 const APP_VERSION =
-  "v1.0.4";
+  "v1.0.5";
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
@@ -1115,33 +1115,37 @@ function renderRequestPagination(totalItems) {
 
   pagination.appendChild(prevBtn);
 
-  addPageButton(1);
+addPageButton(1);
 
-  if (currentRequestPage > 3) {
-    addDots();
-  }
+if (currentRequestPage > 2) {
 
-  if (
-    currentRequestPage !== 1 &&
-    currentRequestPage !== totalPages
-  ) {
+  addDots();
+}
 
-    addPageButton(
-      currentRequestPage
-    );
-  }
+if (
+  currentRequestPage !== 1 &&
+  currentRequestPage !== totalPages
+) {
 
-  if (
-    currentRequestPage <=
-    totalPages - 2
-  ) {
+  addPageButton(
+    currentRequestPage
+  );
+}
 
-    addDots();
-  }
+if (
+  currentRequestPage <
+  totalPages - 1
+) {
 
-  if (totalPages > 1) {
-    addPageButton(totalPages);
-  }
+  addDots();
+}
+
+if (totalPages > 1) {
+
+  addPageButton(
+    totalPages
+  );
+}
 
   const nextBtn =
     document.createElement("button");
