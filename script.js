@@ -1,5 +1,5 @@
 const APP_VERSION =
-  "v1.0.1";
+  "v1.0.2";
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
@@ -792,7 +792,10 @@ function applySongFilter() {
 
 async function loadRequestData() {
 
-if (!requestBody.innerHTML.trim()) {
+if (
+  !requestBody.innerHTML.trim() &&
+  allRequestData.length === 0
+) {
 
   requestBody.innerHTML = `
     <tr>
@@ -830,9 +833,23 @@ if (!requestBody.innerHTML.trim()) {
     const data =
       await response.json();
 
+  if (
+    Array.isArray(data) &&
+    data.length > 0
+  ) {
+
     allRequestData = data;
 
-    renderRequestTable(allRequestData);
+    renderRequestTable(
+      allRequestData
+    );
+  }
+  else if (
+    allRequestData.length === 0
+  ) {
+
+    renderRequestTable([]);
+  }
 
   } catch (error) {
 
@@ -2086,6 +2103,21 @@ setInterval(
   updateRequestCooldown,
   1000
 );
+
+setInterval(() => {
+
+  const role =
+    localStorage.getItem(
+      "aqila_role"
+    );
+
+  if (!role) return;
+
+  loadRequestData();
+
+  loadSongData(role);
+
+}, 5000);
 
 if ("serviceWorker" in navigator) {
 
