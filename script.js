@@ -30,7 +30,7 @@ let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
 const SESSION_TIMEOUT =
-  5 * 60 * 1000;
+  1 * 20 * 1000;
 
 let sessionTimer = null;
 
@@ -2120,7 +2120,8 @@ function initSessionListener() {
   [
     "click",
     "touchstart",
-    "keydown"
+    "keydown",
+    "scroll"
   ].forEach(event => {
 
     document.addEventListener(

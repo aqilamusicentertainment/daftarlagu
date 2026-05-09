@@ -1,5 +1,5 @@
 const CACHE_NAME =
-  "aqila-v99";
+  "aqila-v01";
 
 const urlsToCache = [
   "./",
