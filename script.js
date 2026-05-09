@@ -30,7 +30,7 @@ let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
 const SESSION_TIMEOUT =
-  15 * 60 * 1000;
+  1 * 10 * 1000;
 
 let sessionTimer = null;
 
