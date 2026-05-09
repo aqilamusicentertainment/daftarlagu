@@ -1,5 +1,5 @@
 const APP_VERSION =
-  "v1.0.2";
+  "v1.0.3";
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
@@ -7,7 +7,9 @@ const SCRIPT_URL =
 let currentRequestPage = 1;
 
 let allSongData = [];
+let songLoaded = false;
 let allRequestData = [];
+let requestLoaded = false;
 
 let currentRole = "";
 
@@ -73,10 +75,10 @@ const roleBadge =
 const songTables =
   document.getElementById("songTables");
 
-const requestHead =
+let requestHead =
   document.getElementById("requestHead");
 
-const requestBody =
+let requestBody =
   document.getElementById("requestBody");
 
 const logoutBtn =
@@ -507,14 +509,15 @@ function showApp(role) {
 
 async function loadSongData(role) {
 
-if (!allSongData.length) {
+if (!songLoaded) {
 
   songTables.innerHTML = `
-    <div class="table-card">
-      <div class="loading-state">
-        <i class="ri-loader-4-line rotating"></i>
-        Memuat daftar lagu...
-      </div>
+    <div class="loading-state">
+
+      <i class="ri-loader-4-line rotating"></i>
+
+      Memuat daftar lagu...
+
     </div>
   `;
 }
@@ -537,6 +540,7 @@ if (!allSongData.length) {
       await response.json();
 
     allSongData = data;
+    songLoaded = true;
 
     applySongFilter();
 
@@ -545,8 +549,10 @@ if (!allSongData.length) {
     console.error(error);
 
     songTables.innerHTML = `
-      <div class="table-card">
+      <div class="empty-state">
+
         Gagal mengambil data lagu
+
       </div>
     `;
   }
@@ -792,28 +798,22 @@ function applySongFilter() {
 
 async function loadRequestData() {
 
-if (
-  !requestBody.innerHTML.trim() &&
-  allRequestData.length === 0
-) {
+if (!requestLoaded) {
 
-  requestBody.innerHTML = `
-    <tr>
+  const requestTable =
+  document.querySelector(
+    "#requestSection .table-responsive"
+  );
 
-      <td colspan="4">
+requestTable.innerHTML = `
+  <div class="loading-state">
 
-        <div class="loading-state">
+    <i class="ri-loader-4-line rotating"></i>
 
-          <i class="ri-loader-4-line rotating"></i>
+    Memuat daftar request...
 
-          Memuat daftar request...
-
-        </div>
-
-      </td>
-
-    </tr>
-  `;
+  </div>
+`;
 }
 
   try {
@@ -833,34 +833,31 @@ if (
     const data =
       await response.json();
 
-  if (
-    Array.isArray(data) &&
-    data.length > 0
-  ) {
+if (Array.isArray(data)) {
 
-    allRequestData = data;
+  allRequestData = data;
+  requestLoaded = true;
 
-    renderRequestTable(
-      allRequestData
-    );
-  }
-  else if (
-    allRequestData.length === 0
-  ) {
-
-    renderRequestTable([]);
-  }
+  renderRequestTable(
+    allRequestData
+  );
+}
 
   } catch (error) {
 
     console.error(error);
 
-    requestBody.innerHTML = `
-      <tr>
-        <td colspan="4">
-          Gagal memuat request
-        </td>
-      </tr>
+    const requestTable =
+      document.querySelector(
+        "#requestSection .table-responsive"
+      );
+
+    requestTable.innerHTML = `
+      <div class="empty-state">
+
+        Gagal memuat request
+
+      </div>
     `;
   }
 }
@@ -879,20 +876,40 @@ function renderRequestTable(data) {
       "#requestSection .table-responsive"
     );
 
+requestTable.innerHTML = `
+  <table>
+
+    <thead>
+      <tr id="requestHead"></tr>
+    </thead>
+
+    <tbody id="requestBody"></tbody>
+
+  </table>
+`;
+
+requestHead =
+  document.getElementById(
+    "requestHead"
+  );
+
+requestBody =
+  document.getElementById(
+    "requestBody"
+  );
+
   if (!data || data.length === 0) {
 
     requestTable.classList.add(
       "table-empty"
     );
 
-    requestHead.innerHTML = "";
+    requestTable.innerHTML = `
+      <div class="empty-state">
 
-    requestBody.innerHTML = `
-      <tr>
-        <td colspan="4">
-          Belum ada request
-        </td>
-      </tr>
+        Belum ada request
+
+      </div>
     `;
 
     document

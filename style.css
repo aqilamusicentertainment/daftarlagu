@@ -712,6 +712,7 @@ body.dark .icon-btn:hover {
 
 #songTables .card-title {
   margin-bottom: 15px;
+  padding-top: 18px;
 }
 
 #songTables .category-label {
@@ -782,13 +783,22 @@ thead th:last-child {
 
 th,
 td {
-  padding: 18px;
 
   font-size: 14px;
 
   text-align: center;
 
   white-space: nowrap;
+}
+
+th {
+
+  padding: 18px;
+}
+
+td {
+
+  padding: 10px 18px;
 }
 
 td {
@@ -827,6 +837,8 @@ td:last-child {
   color: var(--soft);
 
   padding: 18px 0 8px;
+
+  font-style: italic;
 }
 
 .table-responsive::-webkit-scrollbar {
@@ -1103,7 +1115,7 @@ body.dark .bottom-nav {
 
   gap: 12px;
 
-  margin-bottom: 22px;
+  margin-bottom: 34px;
 }
 
 .song-filter-row .search-box,
@@ -1980,4 +1992,36 @@ body.player-mode #dashboardSection td:nth-child(4) {
   object-fit: cover;
 
   display: block;
+}
+
+#songTables .table-card {
+
+  background: transparent;
+
+  border: none;
+
+  box-shadow: none;
+
+  padding: 0;
+
+  border-radius: 0;
+
+  position: relative;
+}
+
+#songTables .table-card::before {
+
+  content: "";
+
+  position: absolute;
+
+  top: -9px;
+
+  left: -20px;
+
+  right: -20px;
+
+  height: 1px;
+
+  background: var(--border);
 }
