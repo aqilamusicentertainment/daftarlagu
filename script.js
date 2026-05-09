@@ -1,3 +1,6 @@
+const APP_VERSION =
+  "v1.0.1";
+
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
 
@@ -46,6 +49,17 @@ const notifDots =
 
 const loginPage =
   document.getElementById("loginPage");
+
+const appVersion =
+  document.getElementById(
+    "appVersion"
+  );
+
+if (appVersion) {
+
+  appVersion.innerText =
+    `Version ${APP_VERSION}`;
+}
 
 const appPage =
   document.getElementById("appPage");

@@ -1,12 +1,15 @@
+const VERSION =
+  "1.0.1";
+
 const CACHE_NAME =
-  "aqila-v04";
+  `aqila-v${VERSION}`;
 
 const urlsToCache = [
   "./",
   "./index.html",
-  "./style.css?v=04",
-  "./script.js?v=04",
-  "./icon.png"
+  `./style.css?v=${VERSION}`,
+  `./script.js?v=${VERSION}`,
+  "./img/icon.png"
 ];
 
 self.skipWaiting();
