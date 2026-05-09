@@ -1,31 +1,76 @@
 const CACHE_NAME =
-  "aqila-v01";
+  "aqila-v02";
 
 const urlsToCache = [
   "./",
   "./index.html",
-  "./style.css",
-  "./script.js"
+  "./style.css?v=02",
+  "./script.js?v=02",
+  "./icon.png"
 ];
 
-self.addEventListener("install", event => {
+self.skipWaiting();
 
-  event.waitUntil(
+self.addEventListener(
+  "install",
+  event => {
 
-    caches.open(CACHE_NAME).then(cache => {
+    event.waitUntil(
 
-      return cache.addAll(urlsToCache);
-    })
-  );
-});
+      caches.open(CACHE_NAME)
+        .then(cache => {
 
-self.addEventListener("fetch", event => {
+          return cache.addAll(
+            urlsToCache
+          );
+        })
+    );
+  }
+);
 
-  event.respondWith(
+self.addEventListener(
+  "activate",
+  event => {
 
-    caches.match(event.request).then(response => {
+    event.waitUntil(
 
-      return response || fetch(event.request);
-    })
-  );
-});
+      caches.keys().then(keys => {
+
+        return Promise.all(
+
+          keys.map(key => {
+
+            if (
+              key !== CACHE_NAME
+            ) {
+
+              return caches.delete(
+                key
+              );
+            }
+          })
+        );
+      })
+    );
+
+    self.clients.claim();
+  }
+);
+
+self.addEventListener(
+  "fetch",
+  event => {
+
+    event.respondWith(
+
+      caches.match(event.request)
+        .then(response => {
+
+          return (
+            response ||
+            fetch(event.request)
+          );
+        })
+    );
+  }
+);
