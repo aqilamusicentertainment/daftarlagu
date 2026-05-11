@@ -1,5 +1,5 @@
 const APP_VERSION =
-  "v1.0.6";
+  "v1.0.7";
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
@@ -608,13 +608,6 @@ if (!songLoaded) {
 
       applySongFilter();
     }
-
-if (newData !== oldData) {
-
-  allSongData = data;
-
-  applySongFilter();
-}
 
 songLoaded = true;
 
@@ -1384,6 +1377,39 @@ window.addEventListener(
       localStorage.getItem(
         "aqila_role"
       );
+
+      const lastActive =
+      localStorage.getItem(
+        "aqila_last_active"
+      );
+
+    if (
+      role &&
+      lastActive
+    ) {
+
+      const diff =
+        Date.now() - Number(lastActive);
+
+      if (diff >= SESSION_TIMEOUT) {
+
+        localStorage.removeItem(
+          "aqila_role"
+        );
+
+        localStorage.removeItem(
+          "aqila_last_active"
+        );
+
+        alert(
+          "Sesi login telah berakhir"
+        );
+
+        location.reload();
+
+        return;
+      }
+    }
 
     if (role) {
 
@@ -2314,6 +2340,11 @@ updateRequestCooldown();
 
 function resetSessionTimer() {
 
+  localStorage.setItem(
+    "aqila_last_active",
+    Date.now()
+  );
+
   clearTimeout(sessionTimer);
 
   const role =
@@ -2332,6 +2363,9 @@ function resetSessionTimer() {
 
       localStorage.removeItem(
         "aqila_role"
+      );
+      localStorage.removeItem(
+        "aqila_last_active"
       );
 
       location.reload();
