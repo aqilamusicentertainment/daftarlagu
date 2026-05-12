@@ -1,8 +1,8 @@
 const APP_VERSION =
-  "1.0.7";
+  "1.0.8";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzNOSdriayfIqYyRqhG-2erCUOL5N-de151lOXT-O93PS2m_PCBgDZy7xEk7Zv70Wul/exec";
+  "https://script.google.com/macros/s/AKfycbwP7vcZH-N7EemXhPQcdeyI35AwCYol4ROItKxVICEyHh-VN_1-RSXO0oWueaBAUYQ/exec";
 
 let currentRequestPage = 1;
 
@@ -10,6 +10,7 @@ let allSongData = [];
 let songLoaded = false;
 let allRequestData = [];
 let requestLoaded = false;
+let selectAnimating = false;
 
 let currentRole = "";
 
@@ -223,10 +224,10 @@ document.addEventListener(
       );
     }
     if (customSelect) {
-  customSelect.classList.remove(
-    "active"
-  );
-}
+      customSelect.classList.remove(
+        "active"
+      );
+    }
   }
 );
 
@@ -264,6 +265,61 @@ function updateNotifSlider() {
         )
       );
     });
+}
+
+function setLoginLoading(isLoading) {
+
+  const roleInput =
+    document.getElementById("role");
+
+  const passwordInput =
+    document.getElementById("password");
+
+  const submitBtn =
+      document.getElementById(
+    "loginBtn"
+  );
+
+  if (isLoading) {
+
+    loginForm.classList.add(
+      "form-loading"
+    );
+
+    submitBtn.disabled = true;
+
+    passwordInput.disabled = true;
+
+    customSelect.style.pointerEvents =
+      "none";
+
+    customSelect.style.opacity =
+      ".6";
+
+    submitBtn.innerHTML = `
+      <i class="ri-loader-4-line rotating"></i>
+      Memeriksa...
+    `;
+
+  } else {
+
+    loginForm.classList.remove(
+      "form-loading"
+    );
+
+    submitBtn.disabled = false;
+
+    passwordInput.disabled = false;
+
+    customSelect.style.pointerEvents =
+      "";
+
+    customSelect.style.opacity =
+      "";
+
+    submitBtn.innerHTML =
+      "Masuk";
+  }
 }
 
 function startNotifAutoplay() {
@@ -342,10 +398,10 @@ loginForm.addEventListener(
     const role =
       document.getElementById("role").value;
 
-    const pin =
-      document.getElementById("pin").value;
+    const password =
+      document.getElementById("password").value;
 
-    if (!role || !pin) {
+    if (!role || !password) {
 
       alert("Lengkapi data login");
 
@@ -353,14 +409,11 @@ loginForm.addEventListener(
     }
 
     const submitBtn =
-      loginForm.querySelector("button");
+          document.getElementById(
+      "loginBtn"
+    );
 
-    submitBtn.disabled = true;
-
-    submitBtn.innerHTML = `
-      <i class="ri-loader-4-line rotating"></i>
-      Memeriksa...
-    `;
+    setLoginLoading(true);
 
     try {
 
@@ -373,7 +426,7 @@ loginForm.addEventListener(
             body: JSON.stringify({
               action: "login",
               role,
-              pin
+              password
             })
           }
         );
@@ -383,12 +436,9 @@ loginForm.addEventListener(
 
       if (!result.success) {
 
-        alert("PIN salah");
+        alert("Password salah");
 
-        submitBtn.disabled = false;
-
-        submitBtn.innerText =
-          "Masuk";
+        setLoginLoading(false);
 
         return;
       }
@@ -414,10 +464,7 @@ loginForm.addEventListener(
 
       alert("Gagal login");
 
-      submitBtn.disabled = false;
-
-      submitBtn.innerText =
-        "Masuk";
+      setLoginLoading(false);
     }
   }
 );
@@ -520,7 +567,7 @@ function showApp(role) {
 
   document.body.classList.remove(
     "player-mode",
-    "vocal-mode"
+    "lainnya-mode"
   );
 
   document.body.classList.add(
@@ -531,8 +578,19 @@ function showApp(role) {
 
   appPage.classList.remove("hidden");
 
-  roleBadge.innerText =
-    role.toUpperCase();
+  if (role === "player") {
+
+    roleBadge.innerText =
+      "PLAYER";
+
+    roleBadge.style.display =
+      "inline-flex";
+
+  } else {
+
+    roleBadge.style.display =
+      "none";
+  }
 
   loadSongData(role);
 
@@ -1448,44 +1506,6 @@ requestForm.addEventListener(
 
     if (isSendingRequest) return;
 
-    const lastRequest =
-      localStorage.getItem(
-        "aqila_last_request"
-      );
-
-    const now = Date.now();
-
-    const cooldown =
-      1 * 60 * 1000;
-
-    if (lastRequest) {
-
-      const diff =
-        now - Number(lastRequest);
-
-      if (diff < cooldown) {
-
-        const remain =
-          cooldown - diff;
-
-        const minutes =
-          Math.floor(
-            remain / 60000
-          );
-
-        const seconds =
-          Math.floor(
-            (remain % 60000) / 1000
-          );
-
-        alert(
-          `Tunggu ${minutes}m ${seconds}d sebelum request lagi`
-        );
-
-        return;
-      }
-    }
-
     const namaLagu =
       document.getElementById(
         "namaLagu"
@@ -1558,45 +1578,85 @@ if (
 
     const roleLabel = {
       player: "Player",
-      vocal: "Vocal"
+      lainnya: "Lainnya"
     };
 
     try {
+      const loadingStart =
+        Date.now();
 
       isSendingRequest = true;
 
       requestBtn.disabled = true;
 
-      requestBtn.innerText =
-        "Mengirim...";
+      requestBtn.innerHTML = `
+        <i class="ri-loader-4-line rotating"></i>
+        Memeriksa...
+      `;
 
-    await fetch(
-      SCRIPT_URL,
-      {
-        method: "POST",
+      const response =
+        await fetch(
+          SCRIPT_URL,
+          {
+            method: "POST",
 
-        body: JSON.stringify({
-          action: "addRequest",
+            body: JSON.stringify({
+              action: "addRequest",
 
-          namaLagu,
-          catatan,
+              namaLagu,
+              catatan,
 
-          requestBy:
-            roleLabel[role]
-        })
+              requestBy:
+                roleLabel[role]
+            })
+          }
+        );
+
+      const result =
+        await response.json();
+
+        const elapsed =
+          Date.now() - loadingStart;
+
+        const minLoading =
+          1000;
+
+        if (elapsed < minLoading) {
+
+          await new Promise(resolve =>
+            setTimeout(
+              resolve,
+              minLoading - elapsed
+            )
+          );
+        }
+
+      if (!result.success) {
+
+        alert(result.message);
+
+        requestBtn.disabled = false;
+
+        requestBtn.innerText =
+          "Kirim Request";
+
+        isSendingRequest = false;
+
+        return;
       }
-    );
 
       localStorage.setItem(
         "aqila_last_request",
         Date.now()
       );
 
-      updateRequestCooldown();
-
       alert(
         "Request berhasil dikirim 🔥"
       );
+
+      isSendingRequest = false;
+      
+      updateRequestCooldown();
 
       requestForm.reset();
 
@@ -1759,6 +1819,12 @@ if (customSelect) {
 
       e.stopPropagation();
 
+      if (
+        customSelect.classList.contains(
+          "closing"
+        )
+      ) return;
+
       customSelect.classList.toggle(
         "active"
       );
@@ -1786,9 +1852,22 @@ options.forEach(option => {
       roleInput.value =
         value;
 
+      // 🔒 lock interaction
+      customSelect.classList.add(
+        "closing"
+      );
+
       customSelect.classList.remove(
         "active"
       );
+
+      setTimeout(() => {
+
+        customSelect.classList.remove(
+          "closing"
+        );
+
+      }, 250);
     }
   );
 });
@@ -1824,6 +1903,42 @@ const catatanCounter =
     "catatanCounter"
   );
 
+const togglePassword =
+  document.getElementById(
+    "togglePassword"
+  );
+
+const passwordInput =
+  document.getElementById(
+    "password"
+  );
+
+if (
+  togglePassword &&
+  passwordInput
+) {
+
+  togglePassword.addEventListener(
+    "click",
+    () => {
+
+      const isPassword =
+        passwordInput.type ===
+        "password";
+
+      passwordInput.type =
+        isPassword
+          ? "text"
+          : "password";
+
+      togglePassword.innerHTML =
+        isPassword
+          ? '<i class="ri-eye-off-line"></i>'
+          : '<i class="ri-eye-line"></i>';
+    }
+  );
+}
+
 namaLaguInput.addEventListener(
   "input",
   () => {
@@ -1844,6 +1959,7 @@ catatanInput.addEventListener(
 
 function updateRequestCooldown() {
 
+  if (isSendingRequest) return;
   if (!requestBtn) return;
 
   const lastRequest =
@@ -2063,6 +2179,14 @@ notifBtn.addEventListener(
       "hidden"
     );
 
+    document.body.classList.add(
+      "modal-open"
+    );
+
+    document.documentElement.classList.add(
+      "modal-open"
+    );
+
     clearInterval(notifInterval);
 
     if (
@@ -2082,53 +2206,17 @@ notifClose.addEventListener(
       "hidden"
     );
 
+    document.body.classList.remove(
+      "modal-open"
+    );
+
+    document.documentElement.classList.remove(
+      "modal-open"
+    );
+
     clearInterval(
       notifInterval
     );
-  }
-);
-
-notifModal.addEventListener(
-  "click",
-  (e) => {
-
-    if (
-      !e.target.closest(
-        ".notif-box"
-      )
-    ) {
-
-      notifModal.classList.add(
-        "hidden"
-      );
-
-      clearInterval(
-        notifInterval
-      );
-    }
-  }
-);
-
-notifModal.addEventListener(
-  "pointerup",
-  (e) => {
-
-    if (
-      e.target === notifModal &&
-      notifModalTouched &&
-      !notifDragged
-    ) {
-
-      notifModal.classList.add(
-        "hidden"
-      );
-
-      clearInterval(
-        notifInterval
-      );
-    }
-
-    notifModalTouched = false;
   }
 );
 

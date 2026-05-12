@@ -345,6 +345,10 @@ button:disabled {
   position: relative;
 }
 
+.custom-select.closing {
+  pointer-events: none;
+}
+
 .select-selected {
   height: 60px;
 
@@ -1954,6 +1958,8 @@ body.player-mode #dashboardSection td:nth-child(4) {
 
   width: min(92%, 420px);
 
+  aspect-ratio: 3 / 4;
+
   border-radius: 28px;
 
   overflow: hidden;
@@ -1964,10 +1970,36 @@ body.player-mode #dashboardSection td:nth-child(4) {
     notifPop .25s ease;
 
   box-shadow:
-    inset 0 0 0 1px
-    rgba(255,255,255,.14);
+    0 24px 60px
+    rgba(0,0,0,.65),
 
-  margin: auto;
+    0 0 28px
+    rgba(255,122,0,.10);
+}
+
+.notif-box::before {
+
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: inherit;
+
+  padding: 2px;
+
+  background:
+    rgba(255,122,0,.28);
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+
+  pointer-events: none;
+
+  z-index: 5;
 }
 
 .notif-box img {
@@ -1977,28 +2009,67 @@ body.player-mode #dashboardSection td:nth-child(4) {
 }
 
 .notif-close {
-  position: absolute;
+  position: fixed;
 
-  top: 12px;
-  right: 12px;
+  top:
+    max(20px, env(safe-area-inset-top));
 
-  width: 38px;
-  height: 38px;
+  right:
+    max(
+      20px,
+      calc((100vw - 1100px) / 2 + 20px)
+    );
+
+  width: 48px;
+  height: 48px;
 
   border: none;
 
-  border-radius: 50%;
+  border-radius: 18px;
 
   background:
-    rgba(0,0,0,.5);
+    rgba(20,20,20,.72);
+
+  backdrop-filter: blur(10px);
 
   color: #fff;
 
-  font-size: 22px;
+  font-size: 26px;
 
   cursor: pointer;
 
-  z-index: 2;
+  z-index: 10001;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.35);
+
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    opacity .2s ease;
+
+  transform: translateZ(0);
+
+  will-change:
+    transform,
+    opacity;
+}
+
+.notif-close:hover {
+  background:
+    rgba(255,122,0,.18);
+
+  transform:
+    scale(1.06);
+}
+
+.notif-close:active {
+  transform:
+    scale(.94);
 }
 
 @keyframes notifPop {
@@ -2152,4 +2223,57 @@ body.player-mode #dashboardSection td:nth-child(4) {
   height: 1px;
 
   background: var(--border);
+}
+
+.form-loading {
+  pointer-events: none;
+  opacity: .92;
+}
+
+.password-box {
+  position: relative;
+}
+
+.toggle-password {
+  border: none;
+  background: transparent;
+
+  color: var(--soft);
+
+  cursor: pointer;
+
+  font-size: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  transition:
+    color .2s ease,
+    transform .2s ease;
+}
+
+.toggle-password:hover {
+  color: var(--primary);
+}
+
+.toggle-password:active {
+  transform: scale(.92);
+}
+
+body.dark .toggle-password {
+  color: #a1a1aa;
+}
+
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+
+  height: 100vh;
+
+  touch-action: none;
+
+  overscroll-behavior: none;
 }

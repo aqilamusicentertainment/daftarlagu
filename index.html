@@ -26,7 +26,7 @@
 
   <link
     rel="stylesheet"
-    href="style.css?v=1.0.7"
+    href="style.css?v=1.0.8"
   />
 
   <link
@@ -50,7 +50,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css"
   />
 
-    <link rel="manifest" href="manifest.json?v=1.0.7">
+    <link rel="manifest" href="manifest.json?v=1.0.8">
 
     <meta name="theme-color" content="#ff7a00">
 </head>
@@ -115,9 +115,9 @@
 
               <div
                 class="select-option"
-                data-value="vocal"
+                data-value="lainnya"
               >
-                Vocal
+                Lainnya
               </div>
 
             </div>
@@ -135,19 +135,27 @@
         <div class="input-group">
 
           <label>
-            PIN
+            Password
           </label>
 
-          <div class="input-box">
+          <div class="input-box password-box">
 
             <i class="ri-lock-2-line"></i>
 
             <input
               type="password"
-              id="pin"
-              placeholder="Masukkan PIN"
+              id="password"
+              placeholder="Masukkan Password"
               required
             />
+
+            <button
+              type="button"
+              class="toggle-password"
+              id="togglePassword"
+            >
+              <i class="ri-eye-line"></i>
+            </button>
 
           </div>
 
@@ -156,6 +164,7 @@
         <button
           type="submit"
           class="login-btn"
+          id="loginBtn"
         >
           Masuk
         </button>
@@ -552,16 +561,16 @@
 
       <div class="notif-overlay"></div>
 
-      <div class="notif-box">
-
-        <button
+          <button
             class="notif-close"
             id="notifClose"
           >
             <i class="ri-close-line"></i>
           </button>
 
-          <div class="notif-slider">
+          <div class="notif-box">
+
+            <div class="notif-slider">
 
             <div
               class="notif-track"
@@ -586,7 +595,7 @@
     </div>
 
     <script
-      src="script.js?v="1.0.7>
+      src="script.js?v="1.0.8>
     </script>
 
 </body>
