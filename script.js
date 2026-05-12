@@ -58,7 +58,6 @@ const appVersion =
   );
 
 if (appVersion) {
-
   appVersion.innerText =
     `Version ${APP_VERSION}`;
 }
@@ -123,9 +122,7 @@ const filterOptions =
 requestFilter.addEventListener(
   "click",
   (e) => {
-
     e.stopPropagation();
-
     requestFilter.classList.toggle(
       "active"
     );
@@ -133,7 +130,6 @@ requestFilter.addEventListener(
 );
 
 if (songCategoryFilter) {
-
   const categoryOptions =
     songCategoryFilter.querySelectorAll(
       ".filter-option"
@@ -142,9 +138,7 @@ if (songCategoryFilter) {
   songCategoryFilter.addEventListener(
     "click",
     (e) => {
-
       e.stopPropagation();
-
       songCategoryFilter.classList.toggle(
         "active"
       );
@@ -156,13 +150,10 @@ if (songCategoryFilter) {
     option.addEventListener(
       "click",
       (e) => {
-
         e.stopPropagation();
-
         categoryOptions.forEach(o =>
           o.classList.remove("active")
         );
-
         option.classList.add(
           "active"
         );
@@ -178,7 +169,6 @@ if (songCategoryFilter) {
         );
 
         applySongFilter();
-
         scrollToTop();
       }
     );
@@ -190,9 +180,7 @@ filterOptions.forEach(option => {
   option.addEventListener(
     "click",
     (e) => {
-
       e.stopPropagation();
-
       filterOptions.forEach(o =>
         o.classList.remove("active")
       );
@@ -216,7 +204,6 @@ filterOptions.forEach(option => {
       );
 
       renderRequestTable(allRequestData);
-
       scrollToTop();
     }
   );
@@ -231,14 +218,11 @@ document.addEventListener(
     );
 
     if (songCategoryFilter) {
-
       songCategoryFilter.classList.remove(
         "active"
       );
     }
-
     if (customSelect) {
-
   customSelect.classList.remove(
     "active"
   );
@@ -250,22 +234,15 @@ function getItemsPerPage() {
 
   const h =
     window.innerHeight;
-
   if (h <= 700) {
-
     return 5;
   }
-
   if (h <= 800) {
-
     return 7;
   }
-
   if (h <= 900) {
-
     return 8;
   }
-
   return 10;
 }
 
