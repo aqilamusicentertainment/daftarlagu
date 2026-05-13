@@ -2,7 +2,7 @@ const APP_VERSION =
   "1.0.8";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwP7vcZH-N7EemXhPQcdeyI35AwCYol4ROItKxVICEyHh-VN_1-RSXO0oWueaBAUYQ/exec";
+  "https://script.google.com/macros/s/AKfycbyU_nuzPaURiNrnbVb5n-e5r1ef7imvdw1Hu-oXQ29OOmiqzPxnLEm7DI000kzyAjR7/exec";
 
 let currentRequestPage = 1;
 
@@ -36,6 +36,9 @@ let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
 let notifOpened = false;
+let isLoadingSongs = false;
+let isLoadingRequests = false;
+let isLoadingNotif = false;
 
 const SESSION_TIMEOUT =
   60 * 60 * 1000;
@@ -473,13 +476,32 @@ loginForm.addEventListener(
 
 async function loadNotification() {
 
+  if (isLoadingNotif) return;
+
+  isLoadingNotif = true;
+
+  let timeout;
+
   try {
+
+    const controller =
+      new AbortController();
+
+    timeout =
+      setTimeout(() => {
+
+        controller.abort();
+
+      }, 10000);
 
     const response =
       await fetch(
         SCRIPT_URL,
         {
           method: "POST",
+
+          signal:
+            controller.signal,
 
           body: JSON.stringify({
             action: "notification"
@@ -562,6 +584,11 @@ async function loadNotification() {
       "Notif gagal dimuat",
       error
     );
+
+  } finally {
+
+    clearTimeout(timeout);
+    isLoadingNotif = false;
   }
 }
 
@@ -604,27 +631,45 @@ function showApp(role) {
 }
 
 async function loadSongData(role) {
+  if (isLoadingSongs) return;
 
-if (!songLoaded) {
+  isLoadingSongs = true;
 
-  songTables.innerHTML = `
-    <div class="loading-state">
+  if (!songLoaded) {
 
-      <i class="ri-loader-4-line rotating"></i>
+    songTables.innerHTML = `
+      <div class="loading-state">
 
-      Memuat daftar lagu...
+        <i class="ri-loader-4-line rotating"></i>
 
-    </div>
-  `;
-}
+        Memuat daftar lagu...
 
-  try {
+      </div>
+    `;
+  }
+  
+let timeout;
+
+try {
+
+    const controller =
+      new AbortController();
+
+    timeout =
+      setTimeout(() => {
+
+        controller.abort();
+
+      }, 10000);
 
     const response =
       await fetch(
         SCRIPT_URL,
         {
           method: "POST",
+
+          signal:
+            controller.signal,
 
           body: JSON.stringify({
             action: "songs"
@@ -634,6 +679,24 @@ if (!songLoaded) {
 
     const data =
       await response.json();
+
+    if (
+      !Array.isArray(data) ||
+      data.length === 0
+    ) {
+
+      songLoaded = true;
+
+      songTables.innerHTML = `
+        <div class="empty-state">
+
+          Belum ada lagu
+
+        </div>
+      `;
+
+      return;
+    }
 
     const newData =
       JSON.stringify(data);
@@ -645,6 +708,24 @@ if (!songLoaded) {
 
       allSongData = data;
 
+      allSongData.sort(
+        (a, b) => {
+
+          const laguA =
+            (a["Nama Lagu"] || "")
+              .toLowerCase();
+
+          const laguB =
+            (b["Nama Lagu"] || "")
+              .toLowerCase();
+
+          return laguA.localeCompare(
+            laguB,
+            "id"
+          );
+        }
+      );
+
       applySongFilter();
     }
 
@@ -654,13 +735,17 @@ songLoaded = true;
 
     console.error(error);
 
-    songTables.innerHTML = `
-      <div class="empty-state">
+    setTimeout(() => {
 
-        Gagal mengambil data lagu
+      loadSongData(role);
 
-      </div>
-    `;
+    }, 3000);
+
+    return;
+    
+  }  finally {
+    isLoadingSongs = false;
+    clearTimeout(timeout);
   }
 }
 
@@ -685,8 +770,9 @@ function renderTable(data, role) {
 
     keys = [
       "Nama Lagu",
-      "Chord Pria",
-      "Chord Wanita",
+      "Nada Pria",
+      "Nada Duet",
+      "Nada Wanita",
       "Tempo",
       "Catatan"
     ];
@@ -903,6 +989,9 @@ function applySongFilter() {
 }
 
 async function loadRequestData() {
+    if (isLoadingRequests) return;
+
+  isLoadingRequests = true;
 
 if (!requestLoaded) {
 
@@ -911,18 +1000,30 @@ if (!requestLoaded) {
     "#requestSection .table-responsive"
   );
 
-requestTable.innerHTML = `
-  <div class="loading-state">
+  requestTable.innerHTML = `
+    <div class="loading-state">
 
-    <i class="ri-loader-4-line rotating"></i>
+      <i class="ri-loader-4-line rotating"></i>
 
-    Memuat daftar request...
+      Memuat daftar request...
 
-  </div>
-`;
+    </div>
+  `;
 }
 
+  let timeout;
+
   try {
+
+    const controller =
+      new AbortController();
+
+    timeout =
+      setTimeout(() => {
+
+        controller.abort();
+
+      }, 10000);
 
     const response =
       await fetch(
@@ -930,24 +1031,27 @@ requestTable.innerHTML = `
         {
           method: "POST",
 
+          signal:
+            controller.signal,
+
           body: JSON.stringify({
             action: "requests"
           })
         }
       );
-
+    
     const data =
       await response.json();
 
-if (Array.isArray(data)) {
+  if (Array.isArray(data)) {
 
-  allRequestData = data;
-  requestLoaded = true;
+    allRequestData = data;
+    requestLoaded = true;
 
-  renderRequestTable(
-    allRequestData
-  );
-}
+    renderRequestTable(
+      allRequestData
+    );
+  }
 
   } catch (error) {
 
@@ -958,24 +1062,32 @@ if (Array.isArray(data)) {
         "#requestSection .table-responsive"
       );
 
-    requestTable.innerHTML = `
-      <div class="empty-state">
+    setTimeout(() => {
 
-        Gagal memuat request
+      loadRequestData();
 
-      </div>
-    `;
+    }, 3000);
+  } finally {
+    isLoadingRequests = false;
+    clearTimeout(timeout);
   }
 }
 
 function renderRequestTable(data) {
 
-  const keys = [
-    "Waktu",
-    "Nama Lagu",
-    "Catatan",
-    "Peminta"
-  ];
+  const keys =
+    currentRole === "lainnya"
+      ? [
+          "Waktu",
+          "Nama Lagu",
+          "Catatan"
+        ]
+      : [
+          "Waktu",
+          "Nama Lagu",
+          "Catatan",
+          "Peminta"
+        ];
 
   const requestTable =
     document.querySelector(

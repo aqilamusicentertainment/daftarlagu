@@ -973,6 +973,10 @@ td:last-child {
   font-style: italic;
 }
 
+#songTables .empty-state {
+  margin-top: -14px;
+}
+
 .table-responsive::-webkit-scrollbar {
   height: 5px;
 }
@@ -1326,7 +1330,7 @@ body.dark .bottom-nav {
 
 .request-search i {
   color: var(--primary);
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .request-search input {
@@ -1341,7 +1345,7 @@ body.dark .bottom-nav {
 
   font-family: 'Nunito', sans-serif;
 
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .filter-row {
@@ -1906,6 +1910,10 @@ body.player-mode #dashboardSection td:nth-child(4) {
   font-weight: 700;
 }
 
+#requestSection .loading-state {
+  margin-top: 16px;
+}
+
 .rotating {
   display: inline-block;
 
@@ -1956,7 +1964,7 @@ body.player-mode #dashboardSection td:nth-child(4) {
 .notif-box {
   position: relative;
 
-  width: min(98%, 620px);
+  width: min(96%, 520px);
 
   aspect-ratio: 3 / 4;
 
