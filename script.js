@@ -35,6 +35,8 @@ let notifStartX = 0;
 let notifMoveX = 0;
 let notifDragged = false;
 let notifModalTouched = false;
+let notifOpened = false;
+
 const SESSION_TIMEOUT =
   60 * 60 * 1000;
 
@@ -504,43 +506,45 @@ async function loadNotification() {
       notifBadge.innerText =
         total;
 
-const oldCount =
-  Number(
-    notifBadge.dataset.count || 0
-  );
+      const oldCount =
+        Number(
+          notifBadge.dataset.count || 0
+        );
 
-notifBadge.dataset.count =
-  total;
+      notifBadge.dataset.count =
+        total;
 
-if (total > 0) {
+      if (total > 0) {
 
-  notifBadge.style.display =
-    "flex";
+        notifBadge.style.display =
+          notifOpened
+            ? "none"
+            : "flex";
 
-  notifBadge.innerText =
-    total;
+        notifBadge.innerText =
+          total;
 
-  notifBadge.style.animation =
-    "none";
+        notifBadge.style.animation =
+          "none";
 
-  notifBadge.offsetHeight;
+        notifBadge.offsetHeight;
 
-  if (oldCount === 0) {
+        if (oldCount === 0) {
 
-    notifBadge.style.animation =
-      "notifAppear .45s ease";
+          notifBadge.style.animation =
+            "notifAppear .45s ease";
 
-  } else if (oldCount !== total) {
+        } else if (oldCount !== total) {
 
-    notifBadge.style.animation =
-      "notifUpdate .35s ease";
-  }
+          notifBadge.style.animation =
+            "notifUpdate .35s ease";
+        }
 
-} else {
+      } else {
 
-  notifBadge.style.display =
-    "none";
-}
+        notifBadge.style.display =
+          "none";
+      }
     }
 
     notificationImages.forEach(item => {
@@ -2036,6 +2040,11 @@ const notifBtn =
     ".ri-notification-3-line"
   ).parentElement;
 
+const notifBadge =
+  document.getElementById(
+    "notifBadge"
+  );
+
 notifBtn.addEventListener(
   "click",
   () => {
@@ -2048,6 +2057,11 @@ notifBtn.addEventListener(
 
       return;
     }
+
+    notifBadge.style.display =
+      "none";
+
+    notifOpened = true;
 
     currentNotifIndex = 0;
 
@@ -2179,6 +2193,14 @@ notifBtn.addEventListener(
       "hidden"
     );
 
+    notifClose.classList.remove(
+      "hide"
+    );
+
+    notifClose.classList.add(
+      "show"
+    );
+
     document.body.classList.add(
       "modal-open"
     );
@@ -2206,6 +2228,14 @@ notifClose.addEventListener(
       "hidden"
     );
 
+    notifClose.classList.remove(
+      "show"
+    );
+
+    notifClose.classList.add(
+      "hide"
+    );
+
     document.body.classList.remove(
       "modal-open"
     );
@@ -2213,6 +2243,14 @@ notifClose.addEventListener(
     document.documentElement.classList.remove(
       "modal-open"
     );
+
+    notifOpened = false;
+
+    if (notificationImages.length) {
+
+      notifBadge.style.display =
+        "flex";
+    }
 
     clearInterval(
       notifInterval
